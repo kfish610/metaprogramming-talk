@@ -13,29 +13,30 @@ inductive Reachable (res : BoardState) : BoardState → Nat → Prop
 
 --------------------- Problems ↓ ---------------------
 
+meta def exprToList (e : Q(List Cell)) : MetaM (List Cell) := do
+  match e with
+  | ~q([]) => return []
+  | ~q($head :: $tail) =>
+    let rest ← exprToList tail
+    match head with
+    | ~q(Cell.filled .x) => return Cell.filled .x :: rest
+    | ~q(Cell.filled .o) => return Cell.filled .o :: rest
+    | ~q(Cell.empty)     => return Cell.empty :: rest
+    | _ => throwError "not a Cell"
+
 elab "reachable" : tactic =>
   withMainContext do
     let goal ← getMainGoal
     let goalType : Q(Prop) ← getMainTarget
     match goalType with
-    | ~q(Reachable
-          (BoardState.mk
-            (Board.mk #v[$c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9])
-            $p
-          ) BoardState.initial _) =>
-        let cells ← #v[c1, c2, c3, c4, c5, c6, c7, c8, c9].mapM (fun c => do
-          match c with
-          | ~q(Cell.filled .x) => return Cell.filled .x
-          | ~q(Cell.filled .o) => return Cell.filled .o
-          | ~q(Cell.empty)     => return Cell.empty
-          | _ => Meta.throwTacticEx `reachable goal m!"Expected Cell, got {c.dbgToString}")
+    | ~q(Reachable (BoardState.mk (Board.mk (Vector.mk (Array.mk $list) _)) $p) BoardState.initial _) =>
+        let cells ← exprToList list
         let pl ← match p with
           | ~q(Player.x) => return Player.x
           | ~q(Player.o) => return Player.o
           | _ => Meta.throwTacticEx `reachable goal m!"Expected Player, got {p.dbgToString}"
 
-        let b := BoardState.mk (Board.mk cells) pl
-        let (xs, os) := (b.board.state.zip (Vector.range 9)).foldl (fun (xs, os) (c, idx) =>
+        let (xs, os) := (cells.zip (List.range 9)).foldl (fun (xs, os) (c, idx) =>
           match c with
           | .filled .x => (idx :: xs, os)
           | .filled .o => (xs, idx :: os)
