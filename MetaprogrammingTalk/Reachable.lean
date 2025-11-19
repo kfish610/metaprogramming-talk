@@ -17,19 +17,19 @@ elab "reachable" : tactic => sorry
 
 
 
-example : Reachable
-  player .o:
-  ┌─┬─┬─┐
-  │ │ │x│
-  ├─┼─┼─┤
-  │ │x│ │
-  ├─┼─┼─┤
-  │ │ │o│
-  └─┴─┴─┘
-  BoardState.initial 3 := by
-    apply Reachable.step 4
-    apply Reachable.step 8
-    apply Reachable.step 2
-    apply Reachable.eql
-    -- moves 4 8 2
-    -- reachable
+-- example : Reachable
+--   player .o:
+--   ┌─┬─┬─┐
+--   │ │ │x│
+--   ├─┼─┼─┤
+--   │ │x│ │
+--   ├─┼─┼─┤
+--   │ │ │o│
+--   └─┴─┴─┘
+--   BoardState.initial 3 := by
+--     apply Reachable.step 4
+--     apply Reachable.step 8
+--     apply Reachable.step 2
+--     apply Reachable.eql
+--     -- moves 4 8 2
+--     -- reachable
